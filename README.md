@@ -1,2 +1,2 @@
-# TangramPuzzle
+# Tangram Puzzle
 Simple Block Puzzle
