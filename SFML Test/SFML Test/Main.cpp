@@ -3,7 +3,6 @@
 #include "Game.h"
 
 
-#define N
 
 int main()
 {

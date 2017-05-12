@@ -4,7 +4,7 @@
 #include "MainScene.h"
 
 #define TimePerFrame sf::seconds(1.f/60.f)
-#define WIDTH 800
+#define WIDTH 1200
 #define HEIGHT 800
 #define N 5
 
