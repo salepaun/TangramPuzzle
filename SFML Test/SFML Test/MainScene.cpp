@@ -12,35 +12,26 @@ MainScene::MainScene(sf::RenderWindow *window, Game *game)
 {
 	mTexture.create(WIDTH, HEIGHT);
 
-	for (auto i = 0; i < N; i++)
+	for (auto i = 0; i <= N; i++)
 	{
-		for (auto j = 0; j < N; j++)
+		for (auto j = 0; j <= N; j++)
 		{
-
-			//points[i][j].x = WIDTH / (N + 2) + i*WIDTH / (N + 2);
-			//points[i][j].y = HEIGHT / (N + 2) + j*HEIGHT / (N + 2);
 			points[i][j].x = EDGE + i*EDGE;
 			points[i][j].y = EDGE + j*EDGE;
 
 		}
 	}
 
-	for (auto i = 0; i < N; i++)
+	for (auto i = 0; i <= N; i++)
 	{
-		for (auto j = 0; j < N; j++)
+		for (auto j = 0; j <= N; j++)
 		{
-			if (j != N - 1)
+			if (j != N)
 				lines.push_back(sf::LineShape(points[i][j], points[i][j + 1]));
-			if (i != N - 1)
+			if (i != N )
 				lines.push_back(sf::LineShape(points[i][j], points[i + 1][j]));
 		}
 	}
-
-	//mWeirdShape.setPosition(200.f, 200.f);
-	//mWeirdShape.addBlock(sf::Block(color(Red), sf::Vector2f()));
-	//mPlayer.setTexture(mTexture);
-	//mPlayer.setPosition(100.f, 100.f);
-
 
 	//izracunaj kombinaciju
 	solution = MainScene::makeLevel();
@@ -51,14 +42,9 @@ MainScene::MainScene(sf::RenderWindow *window, Game *game)
 		for (int j = 0; j < N; j++)
 			current[i][j] = 'X';
 	}
-	/*sf::WeirdShape shape1;
-	shape1.setPosition(100.f, 100.f);
-	shape1.addBlock(sf::Block(color(Red), sf::Vector2f(100.f, 100.f)));
 
-	shape1.addBlock(sf::Block(color(Red), sf::Vector2f(0.f, 0.f)));
-	mWeirdShapes.push_back(shape1);
-	*/
-
+	//print(solution);
+	
 	for (int k = 0; k < M; k++)
 	{
 		sf::WeirdShape shape;
@@ -67,7 +53,7 @@ MainScene::MainScene(sf::RenderWindow *window, Game *game)
 			{
 				if (solution[i][j] == (k + '0'))
 				{
-					shape.addBlock(sf::Block(sf::Vector2f(EDGE*i, EDGE*j)));
+					shape.addBlock(sf::Block(sf::Vector2f(EDGE*j, EDGE*i)));
 				}
 			}
 		mWeirdShapes.push_back(shape);
@@ -82,18 +68,17 @@ MainScene::MainScene(sf::RenderWindow *window, Game *game)
 		mWeirdShapes[i].setBlockColor(*it);
 		std::advance(it, 1);
 	}
-
 }
 
 MainScene::~MainScene()
 {
-	//for (int i = 0; i < N; i++)
-	//{
-	//	//delete solution[i];
-	//	delete current[i];
-	//}
-	//delete solution;
-	//delete current;
+	for (int i = 0; i < N; i++)
+	{
+		delete solution[i];
+		delete current[i];
+	}
+	delete solution;
+	delete current;
 }
 
 void MainScene::run()
@@ -163,9 +148,7 @@ char ** MainScene::makeLevel()
 		for (int j = 0; j < sz; j++)
 		{
 			m[row][column] = i + '0';
-			//std::cout << std::endl;
-			//print(m);
-
+			
 			if (left != 0 && !(
 				(row > 0 && m[row - 1][column] == 'X')
 				|| (row < N - 1 && m[row + 1][column] == 'X')
@@ -244,33 +227,45 @@ char ** MainScene::makeLevel()
 			else
 				map[m[i][j]]++;
 
-	char c = '\0';
-	int min = ~(1 << 31);
-	for (auto &val : x)
+	char c = '0';
+	bool proba = true;
+	while (proba)
 	{
-		if (val.first>0
-			&& m[val.first - 1][val.second] != 'X' && map[m[val.first - 1][val.second]]<min)
+		proba = false;
+		//print(m);
+		for (auto &val : x)
 		{
-			c = m[val.first - 1][val.second];
-			min = map[m[val.first - 1][val.second]];
+			bool test = false;
+			int min = ~(1 << 31);
+			if (val.first > 0
+				&& m[val.first - 1][val.second] != 'X' && map[m[val.first - 1][val.second]] < min)
+			{
+				test = true;
+				c = m[val.first - 1][val.second];
+				min = map[m[val.first - 1][val.second]];
+			}
+			if (val.first < N - 1 && m[val.first + 1][val.second] != 'X' && map[m[val.first + 1][val.second]] < min)
+			{
+				test = true;
+				c = m[val.first + 1][val.second];
+				min = map[m[val.first + 1][val.second]];
+			}
+			if (val.second > 0 && m[val.first][val.second - 1] != 'X' && map[m[val.first][val.second - 1]] < min)
+			{
+				test = true;
+				c = m[val.first][val.second - 1];
+				min = map[m[val.first][val.second - 1]];
+			}
+			if (val.second < N - 1 && m[val.first][val.second + 1] != 'X' && map[m[val.first][val.second + 1]] < min)
+			{
+				test = true;
+				c = m[val.first][val.second + 1];
+				min = map[m[val.first][val.second + 1]];
+			}
+			if (!test)proba = true;
+			m[val.first][val.second] = c;
+			map[c]++;
 		}
-		if (val.first<N - 1 && m[val.first + 1][val.second] != 'X' && map[m[val.first + 1][val.second]]<min)
-		{
-			c = m[val.first + 1][val.second];
-			min = map[m[val.first + 1][val.second]];
-		}
-		if (val.second>0 && m[val.first][val.second - 1] != 'X' && map[m[val.first][val.second - 1]]<min)
-		{
-			c = m[val.first][val.second - 1];
-			min = map[m[val.first][val.second - 1]];
-		}
-		if (val.second<N - 1 && m[val.first][val.second + 1] != 'X' && map[m[val.first][val.second + 1]]<min)
-		{
-			c = m[val.first][val.second + 1];
-			min = map[m[val.first][val.second + 1]];
-		}
-		m[val.first][val.second] = c;
-		map[c]++;
 	}
 	return m;
 }
@@ -308,12 +303,12 @@ void MainScene::processEvents()
 					dif = mWeirdShapes[0].hold(sf::Vector2f(x, y));
 					beingHold = &mWeirdShapes[0];
 				}
-				else if (c == sf::Color::Blue)
+				else if (c == sf::Color::Green)
 				{
 					dif = mWeirdShapes[1].hold(sf::Vector2f(x, y));
 					beingHold = &mWeirdShapes[1];
 				}
-				else if (c == sf::Color::Green)
+				else if (c == sf::Color::Blue)
 				{
 					dif = mWeirdShapes[2].hold(sf::Vector2f(x, y));
 					beingHold = &mWeirdShapes[2];
@@ -328,11 +323,7 @@ void MainScene::processEvents()
 					dif = mWeirdShapes[4].hold(sf::Vector2f(x, y));
 					beingHold = &mWeirdShapes[4];
 				}
-				else if (c == sf::Color::Magenta)
-				{
-					dif = mWeirdShapes[5].hold(sf::Vector2f(x, y));
-					beingHold = &mWeirdShapes[5];
-				}
+				
 				else break;
 
 				hold = true;
@@ -346,12 +337,18 @@ void MainScene::processEvents()
 			if (hold)
 			{
 				sf::Vector2i newpos = sf::Vector2i(evnt.mouseMove.x, evnt.mouseMove.y) - (sf::Vector2i)dif;
-				if (newpos.x >= 0 && newpos.x <= WIDTH && newpos.y >= 0 && newpos.y <= HEIGHT)
+				// TODO fix border colision 
+				/*if (newpos.x < 0)sf::Mouse::setPosition(sf::Vector2i(0, newpos.y),*mWindow);
+				if (newpos.x > WIDTH)sf::Mouse::setPosition(sf::Vector2i(WIDTH, newpos.y), *mWindow);
+				if (newpos.y < 0)sf::Mouse::setPosition(sf::Vector2i(newpos.x, 0), *mWindow);
+				if (newpos.y > HEIGHT)sf::Mouse::setPosition(sf::Vector2i(newpos.x,HEIGHT), *mWindow);*/
+				/*if (newpos.x >= 0 && newpos.x <= WIDTH && newpos.y >= 0 && newpos.y <= HEIGHT)
 					beingHold->setPosition(newpos.x, newpos.y);
 				else if (newpos.x >= 0 && newpos.x <= WIDTH)
-					beingHold->setPosition(newpos.x, beingHold->getPosition().y);
+					beingHold->setPosition(newpos.x, evnt.mouseMove.y);
 				if (newpos.y >= 0 && newpos.y <= HEIGHT)
-					beingHold->setPosition(beingHold->getPosition().x,newpos.y);
+					beingHold->setPosition(evnt.mouseMove.x,newpos.y);*/
+				beingHold->setPosition(newpos.x, newpos.y);
 			}
 			break;
 		}
@@ -396,4 +393,13 @@ void MainScene::handlePlayerInput(sf::Keyboard::Key key,
 
 }
 
+void print(char **m)
+{
+	for (auto i = 0; i < N; i++)
+	{
+		for (auto j = 0; j < N; j++)
+			std::cout << m[i][j] << " ";
+		std::cout << std::endl;
+	}
+}
 

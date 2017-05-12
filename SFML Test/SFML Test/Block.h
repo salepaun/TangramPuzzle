@@ -11,7 +11,7 @@ namespace sf
 		virtual std::size_t getPointCount() const;
 		virtual Vector2f getPoint(std::size_t index) const;
 		bool contains(sf::Vector2f &pos);
-
+		void setColor(sf::Color &color);
 	private:
 		virtual void draw(sf::RenderTarget& target, RenderStates states) const;
 		

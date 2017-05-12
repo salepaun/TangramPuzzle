@@ -37,7 +37,7 @@ private:
 	sf::Vector2f points[N + 1][N + 1];
 	std::list<sf::LineShape> lines;
 	std::vector<sf::WeirdShape> mWeirdShapes;
-	std::list<sf::Color> mColors = { color(Red),color(Green),color(Blue), color(Yellow), color(Magenta),color(Cyan) };
+	std::list<sf::Color> mColors = { color(Red),color(Green),color(Blue), color(Yellow), color(Cyan),color(Magenta) };
 	int mNextColorIndex = 0;
 	std::unordered_map<std::string, sf::WeirdShape> mHash;
 	char **solution, **current;
@@ -52,3 +52,4 @@ private:
 
 };
 
+void print(char**);

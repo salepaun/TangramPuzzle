@@ -25,6 +25,11 @@ bool sf::Block::contains(sf::Vector2f & pos)
 	return	mRect.contains(pos.x, pos.y);
 }
 
+void sf::Block::setColor(sf::Color & color)
+{
+	mShape.setFillColor(color);
+}
+
 void sf::Block::draw(sf::RenderTarget & target, sf::RenderStates states) const
 {
 	target.draw(mShape, states);

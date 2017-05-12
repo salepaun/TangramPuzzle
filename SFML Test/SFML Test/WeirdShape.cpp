@@ -50,6 +50,6 @@ void sf::WeirdShape::setBlockColor(sf::Color & color)
 {
 	for (auto &block : mBlocks)
 	{
-		block.setFillColor(color);
+		block.setColor(color);
 	}
 }
