@@ -3,7 +3,7 @@
 
 #include <SFML/Graphics/Export.hpp>
 #include <SFML/Graphics/Shape.hpp>
-
+#define THICKNESS 5.f
 
 namespace sf
 {

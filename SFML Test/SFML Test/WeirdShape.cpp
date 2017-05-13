@@ -53,3 +53,20 @@ void sf::WeirdShape::setBlockColor(sf::Color & color)
 		block.setColor(color);
 	}
 }
+
+sf::Vector2f sf::WeirdShape::getBlockPoint(Vector2f & mousePosition)
+{
+	if(mBlocks.size()>0)
+	for (auto &block : mBlocks)
+	{
+		if(block.contains(mousePosition,(sf::Vector2f)this->getPosition()))
+		{
+			return this->getPosition() + block.getPosition();
+		}
+	}
+}
+
+std::vector<sf::Block>& sf::WeirdShape::getBlocks()
+{
+	return mBlocks;
+}

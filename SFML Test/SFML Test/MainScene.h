@@ -12,7 +12,8 @@
 #define LEFT 2
 #define RIGHT 3
 #define color(x) sf::Color(sf::Color::x)
-#define EDGE 100
+#define EDGE 64
+#define RANGE EDGE/3
 
 class Game;
 
@@ -31,6 +32,7 @@ private:
 	void drawLines();
 	void drawWeirdShapes();
 	void render();
+	bool checkCanFit(sf::Event &evnt);
 private:
 	sf::RenderWindow *mWindow;
 	sf::Texture mTexture;
@@ -44,6 +46,7 @@ private:
 	bool hold = false;
 	sf::WeirdShape *beingHold;
 	sf::Vector2f dif;
+	sf::Vector2f moveBy;
 
 
 	Game *mGame;

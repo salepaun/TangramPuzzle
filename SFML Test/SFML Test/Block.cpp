@@ -20,9 +20,10 @@ sf::Vector2f sf::Block::getPoint(std::size_t index) const
 	return mShape.getPoint(index);
 }
 
-bool sf::Block::contains(sf::Vector2f & pos)
+bool sf::Block::contains(sf::Vector2f &pos,sf::Vector2f &relativeTo)
 {
-	return	mRect.contains(pos.x, pos.y);
+	sf::Rect<float> rect(relativeTo + mShape.getPosition(), mShape.getSize());
+	return	rect.contains(pos.x, pos.y);
 }
 
 void sf::Block::setColor(sf::Color & color)
@@ -33,4 +34,8 @@ void sf::Block::setColor(sf::Color & color)
 void sf::Block::draw(sf::RenderTarget & target, sf::RenderStates states) const
 {
 	target.draw(mShape, states);
+}
+sf::Vector2f sf::Block::getPosition() const
+{
+	return mShape.getPosition();
 }

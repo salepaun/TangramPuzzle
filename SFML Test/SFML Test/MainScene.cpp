@@ -4,6 +4,7 @@
 #include <iostream>
 #include <algorithm>
 #include <random>
+#include <complex>
 
 
 MainScene::MainScene(sf::RenderWindow *window, Game *game)
@@ -16,8 +17,8 @@ MainScene::MainScene(sf::RenderWindow *window, Game *game)
 	{
 		for (auto j = 0; j <= N; j++)
 		{
-			points[i][j].x = EDGE + i*EDGE;
-			points[i][j].y = EDGE + j*EDGE;
+			points[i][j].x = EDGE + j*EDGE;
+			points[i][j].y = EDGE + i*EDGE;
 
 		}
 	}
@@ -89,12 +90,8 @@ void MainScene::run()
 	{
 		processEvents();
 		timeSinceLastUpdate += clock.restart();
-		while (timeSinceLastUpdate > TimePerFrame)
-		{
-			timeSinceLastUpdate -= TimePerFrame;
-			processEvents();
-			update(TimePerFrame);
-		}
+		processEvents();
+		//update();
 		render();
 	}
 }
@@ -331,8 +328,46 @@ void MainScene::processEvents()
 			}
 			break;
 		case sf::Event::MouseButtonReleased:
-			hold = false;
-			break;
+		{
+			if (hold) {
+				hold = false;
+				/*int x = evnt.mouseButton.x;
+				int y = evnt.mouseButton.y;
+				sf::Vector2i mousePosition = sf::Vector2i(x, y);
+				sf::Vector2i blockPosition = (sf::Vector2i) beingHold->getBlockPoint((sf::Vector2f)mousePosition);
+				sf::Vector2i modBlock(blockPosition);
+				//std::cout << (150 & ~127) << std::endl;
+				modBlock.x &= ~(EDGE - 1);
+				modBlock.y &= ~(EDGE - 1);
+				int row = modBlock.y / EDGE - 1;
+				int column = modBlock.x / EDGE - 1;
+				if (row >= 0 && column >= 0 && row < N && column < N)
+				{
+
+					if (std::sqrt(std::pow(points[row][column].x - blockPosition.x, 2) + std::pow(points[row][column].y - blockPosition.y, 2)) < RANGE)
+					{
+						beingHold->move(points[row][column] - (sf::Vector2f)blockPosition);
+					}
+					else if (std::sqrt(std::pow(points[row][column + 1].x - blockPosition.x, 2) + std::pow(points[row][column + 1].y - blockPosition.y, 2)) < RANGE)
+					{
+						beingHold->move(points[row][column + 1] - (sf::Vector2f)blockPosition);
+					}
+					else if (std::sqrt(std::pow(points[row + 1][column].x - blockPosition.x, 2) + std::pow(points[row + 1][column].y - blockPosition.y, 2)) < RANGE)
+					{
+						beingHold->move(points[row + 1][column] - (sf::Vector2f)blockPosition);
+					}
+					else if (std::sqrt(std::pow(points[row + 1][column + 1].x - blockPosition.x, 2) + std::pow(points[row + 1][column + 1].y - blockPosition.y, 2)) < RANGE)
+					{
+						beingHold->move(points[row + 1][column + 1] - (sf::Vector2f)blockPosition);
+					}
+				}*/
+				if(this->checkCanFit(evnt));
+				{
+					beingHold->move(moveBy);
+				}
+				beingHold = nullptr;
+				break;
+			}}
 		case sf::Event::MouseMoved:
 			if (hold)
 			{
@@ -376,6 +411,8 @@ void MainScene::drawWeirdShapes()
 	{
 		mWindow->draw(shape);
 	}
+	if(beingHold)
+	mWindow->draw(*beingHold);
 }
 
 //render sprites on the screen
@@ -385,6 +422,58 @@ void MainScene::render()
 	drawLines();
 	drawWeirdShapes();
 	mWindow->display();
+}
+
+bool MainScene::checkCanFit(sf::Event &evnt)
+{
+	int x = evnt.mouseButton.x;
+	int y = evnt.mouseButton.y;
+	sf::Vector2i mousePosition = sf::Vector2i(x, y);
+	sf::Vector2i blockPosition = (sf::Vector2i) beingHold->getBlockPoint((sf::Vector2f)mousePosition);
+	sf::Vector2i modBlock(blockPosition);
+	//std::cout << (150 & ~127) << std::endl;
+	modBlock.x &= ~(EDGE - 1);
+	modBlock.y &= ~(EDGE - 1);
+	int row = modBlock.y / EDGE - 1;
+	int column = modBlock.x / EDGE - 1;
+	if (row >= 0 && column >= 0 && row < N && column < N)
+	{
+
+		if (std::sqrt(std::pow(points[row][column].x - blockPosition.x, 2) + std::pow(points[row][column].y - blockPosition.y, 2)) < RANGE)
+		{
+			moveBy = points[row][column] - (sf::Vector2f)blockPosition;
+		}
+		else if (std::sqrt(std::pow(points[row][column + 1].x - blockPosition.x, 2) + std::pow(points[row][column + 1].y - blockPosition.y, 2)) < RANGE)
+		{
+			moveBy = points[row][column + 1] - (sf::Vector2f)blockPosition;
+		}
+		else if (std::sqrt(std::pow(points[row + 1][column].x - blockPosition.x, 2) + std::pow(points[row + 1][column].y - blockPosition.y, 2)) < RANGE)
+		{
+			moveBy = points[row + 1][column] - (sf::Vector2f)blockPosition;
+		}
+		else if (std::sqrt(std::pow(points[row + 1][column + 1].x - blockPosition.x, 2) + std::pow(points[row + 1][column + 1].y - blockPosition.y, 2)) < RANGE)
+		{
+			moveBy = points[row + 1][column + 1] - (sf::Vector2f)blockPosition;
+		}
+		else return false;
+	}
+	else return false;
+
+	for(auto &block: beingHold->getBlocks())
+	{
+		int row = (block.getPosition() + beingHold->getPosition() + moveBy).y/EDGE-1;
+		int column = (block.getPosition() + beingHold->getPosition() + moveBy).x / EDGE - 1;
+		if (!(row >= 0 && column >= 0 && row < N && column < N)) return false;
+	}
+
+	for (auto &block : beingHold->getBlocks())
+	{
+		int row = (block.getPosition() + beingHold->getPosition() + moveBy).y / EDGE - 1;
+		int column = (block.getPosition() + beingHold->getPosition() + moveBy).x / EDGE - 1;
+		if (current[row][column] != 'X')return false;
+		current[row][column] = 'O';
+	}
+	return true;
 }
 
 void MainScene::handlePlayerInput(sf::Keyboard::Key key,

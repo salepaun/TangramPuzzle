@@ -10,13 +10,13 @@ namespace sf
 		m_direction(point2 - point1)
 	{
 		setPosition(point1);
-		setThickness(5.f);
+		setThickness(THICKNESS);
 	}
 
 	LineShape::LineShape() :
 		m_direction()
 	{
-		setThickness(5.f);
+		setThickness(THICKNESS);
 	}
 
 	void LineShape::setDirection(sf::Vector2f & dir)

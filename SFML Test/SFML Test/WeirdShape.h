@@ -16,6 +16,8 @@ namespace sf
 		void addBlock(sf::Block &block);
 		Vector2f hold(sf::Vector2f &pos);
 		void setBlockColor(sf::Color &color);
+		Vector2f getBlockPoint(Vector2f &mousePosition);
+		std::vector<sf::Block>& getBlocks();
 	private:
 		std::vector<sf::Block> mBlocks;
 	};
