@@ -4,9 +4,10 @@
 #include <list>
 #include "Block.h"
 #include <unordered_map>
+#include <set>
 #include "WeirdShape.h"
 #define N 5
-#define M 5
+#define M 6
 #define UP 0
 #define DOWN 1
 #define LEFT 2
@@ -27,12 +28,18 @@ public:
 	static char **makeLevel();
 private:
 	void handlePlayerInput(sf::Keyboard::Key key, bool isPressed);
+	bool checkIfWon();
 	void processEvents();
 	void update(sf::Time);
 	void drawLines();
 	void drawWeirdShapes();
 	void render();
 	bool checkCanFit(sf::Event &evnt);
+	void resetCurrent();
+	void centerText(sf::Text &text, std::string value, float height, sf::Color &clr = sf::Color(sf::Color::Black));
+	void newLevel(int i = 1);
+
+
 private:
 	sf::RenderWindow *mWindow;
 	sf::Texture mTexture;
@@ -44,9 +51,14 @@ private:
 	std::unordered_map<std::string, sf::WeirdShape> mHash;
 	char **solution, **current;
 	bool hold = false;
+	bool hasWon = false;
 	sf::WeirdShape *beingHold;
 	sf::Vector2f dif;
 	sf::Vector2f moveBy;
+	sf::Text mWinText[2], mResetText;
+	sf::Font mFont;
+	
+	
 
 
 	Game *mGame;

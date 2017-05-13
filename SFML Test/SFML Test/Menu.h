@@ -19,13 +19,15 @@ public:
 	void processEvents();
 	void update();
 	void render() const;
+	void centerText(sf::Text &text, std::string value, float height, sf::Color &clr = sf::Color(sf::Color::White));
 private:
 
 
 	int selectedItemIndex;
-	sf::Font font;
+	sf::Font mFont;
 	sf::Text menu[MAX_NUMBER_OF_ITEMS];
 	sf::RenderWindow *mWindow;
+	sf::Sprite mBackground;
 	Game *mGame;
 	bool up;
 	bool down;

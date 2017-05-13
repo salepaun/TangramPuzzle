@@ -3,7 +3,6 @@
 #include "Menu.h"
 #include "MainScene.h"
 
-#define TimePerFrame sf::seconds(1.f/60.f)
 #define WIDTH 1200
 #define HEIGHT 800
 #define N 5
@@ -23,9 +22,6 @@ public:
 	Menu mMenu;
 	MainScene mMain;
 	bool menu = true;
-
-
-	float PlayerSpeed = 100.f;
 
 };
 

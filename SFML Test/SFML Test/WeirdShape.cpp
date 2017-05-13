@@ -1,11 +1,11 @@
 #include "WeirdShape.h"
 
-
+char sf::WeirdShape::next = '0';
 
 sf::WeirdShape::WeirdShape():
 	mBlocks()
 {
-	
+	mark = next++;
 }
 
 
@@ -69,4 +69,9 @@ sf::Vector2f sf::WeirdShape::getBlockPoint(Vector2f & mousePosition)
 std::vector<sf::Block>& sf::WeirdShape::getBlocks()
 {
 	return mBlocks;
+}
+
+char sf::WeirdShape::getMark() const
+{
+	return mark;
 }

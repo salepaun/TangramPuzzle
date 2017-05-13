@@ -11,6 +11,7 @@ namespace sf
 	{
 		setPosition(point1);
 		setThickness(THICKNESS);
+		//setFillColor(sf::Color(sf::Color::Black));
 	}
 
 	LineShape::LineShape() :

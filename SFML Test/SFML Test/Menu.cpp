@@ -10,31 +10,39 @@ Menu::Menu(sf::RenderWindow* window, Game *game)
 {
 	mGame = game;
 	mWindow = window;
-	if (!font.loadFromFile("neuropol x rg.ttf"))
+	if (!mFont.loadFromFile("neuropol x rg.ttf"))
 	{
 		//handle error
-		std::cout << "error font" << std::endl;
+		std::cout << "error mFont" << std::endl;
 		mWindow->close();
 		return;
 	}
-	menu[0].setFont(font);
-	menu[0].setFillColor(sf::Color::Red);
-	menu[0].setString("Play");
-	menu[0].setPosition(sf::Vector2f(WIDTH / 3, HEIGHT / (MAX_NUMBER_OF_ITEMS + 1) * 1));
+	centerText(menu[0], "Play", HEIGHT / (MAX_NUMBER_OF_ITEMS + 1),color(Red));
+	centerText(menu[1], "Options", HEIGHT / (MAX_NUMBER_OF_ITEMS + 1) + 100);
+	centerText(menu[2], "Exit", HEIGHT / (MAX_NUMBER_OF_ITEMS + 1) + 200);
 
-	menu[1].setFont(font);
+	/*menu[1].setFont(mFont);
 	menu[1].setFillColor(sf::Color::White);
 	menu[1].setString("Options");
 	menu[1].setPosition(sf::Vector2f(WIDTH / 3, HEIGHT / (MAX_NUMBER_OF_ITEMS + 1) * 2));
 
-	menu[2].setFont(font);
+	menu[2].setFont(mFont);
 	menu[2].setFillColor(sf::Color::White);
 	menu[2].setString("Exit");
-	menu[2].setPosition(sf::Vector2f(WIDTH / 3, HEIGHT / (MAX_NUMBER_OF_ITEMS + 1) * 3));
+	menu[2].setPosition(sf::Vector2f(WIDTH / 3, HEIGHT / (MAX_NUMBER_OF_ITEMS + 1) * 3));*/
 
 	selectedItemIndex = 0;
 
 	up = down = enter = false;
+	/*sf::Texture texture;
+	if (!texture.loadFromFile("menu.png"))
+	{
+		std::cout << "background" << std::endl;
+		mWindow->close();
+		return;
+	}
+	mBackground = sf::Sprite(texture);
+	mBackground.setPosition(0, 0);*/
 }
 
 void Menu::MoveUp()
@@ -126,11 +134,31 @@ void Menu::update()
 
 void Menu::render() const
 {
-	mWindow->clear();
+	mWindow->clear(sf::Color(30, 144, 255));
+	//mWindow->draw(mBackground);
 	for (int i = 0; i < MAX_NUMBER_OF_ITEMS; i++)
 	{
 		mWindow->draw(menu[i]);
 	}
 
 	mWindow->display();
+}
+
+void Menu::centerText(sf::Text & text, std::string value, float height, sf::Color & clr)
+{
+	text.setFont(mFont);
+	text.setFillColor(clr);
+	text.setString(value);
+	//mWinText.setPosition(sf::Vector2f(WIDTH / 3, HEIGHT / (MAX_NUMBER_OF_ITEMS + 1) * 1));
+	size_t CharacterSize = text.getCharacterSize();
+	std::string String = text.getString().toAnsiString();
+	bool bold = (text.getStyle() & sf::Text::Bold);
+
+
+	sf::FloatRect rect = text.getGlobalBounds();
+
+	rect.left = (mWindow->getSize().x / 2.0f) - (rect.width / 2.0f);
+	rect.top = height;
+
+	text.setPosition(rect.left, rect.top);
 }

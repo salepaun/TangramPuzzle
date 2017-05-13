@@ -12,7 +12,6 @@ MainScene::MainScene(sf::RenderWindow *window, Game *game)
 	, mGame(game)
 {
 	mTexture.create(WIDTH, HEIGHT);
-
 	for (auto i = 0; i <= N; i++)
 	{
 		for (auto j = 0; j <= N; j++)
@@ -22,7 +21,6 @@ MainScene::MainScene(sf::RenderWindow *window, Game *game)
 
 		}
 	}
-
 	for (auto i = 0; i <= N; i++)
 	{
 		for (auto j = 0; j <= N; j++)
@@ -33,63 +31,34 @@ MainScene::MainScene(sf::RenderWindow *window, Game *game)
 				lines.push_back(sf::LineShape(points[i][j], points[i + 1][j]));
 		}
 	}
-
-	//izracunaj kombinaciju
-	solution = MainScene::makeLevel();
-	current = new char*[N];
-	for (auto i = 0; i < N; i++)
+	newLevel();
+	if (!mFont.loadFromFile("neuropol x rg.ttf"))
 	{
-		current[i] = new char[N];
-		for (int j = 0; j < N; j++)
-			current[i][j] = 'X';
+		//handle error
+		std::cout << "error font" << std::endl;
+		mWindow->close();
+		return;
 	}
-
-	//print(solution);
-	
-	for (int k = 0; k < M; k++)
-	{
-		sf::WeirdShape shape;
-		for (int i = 0; i < N; i++)
-			for (int j = 0; j < N; j++)
-			{
-				if (solution[i][j] == (k + '0'))
-				{
-					shape.addBlock(sf::Block(sf::Vector2f(EDGE*j, EDGE*i)));
-				}
-			}
-		mWeirdShapes.push_back(shape);
-	}
-
-	auto engine = std::default_random_engine{};
-	std::shuffle(std::begin(mWeirdShapes), std::end(mWeirdShapes), engine);
-	auto it = mColors.begin();
-	for (int i = 0; i < M; i++)
-	{
-		
-		mWeirdShapes[i].setBlockColor(*it);
-		std::advance(it, 1);
-	}
+	centerText(mWinText[0], "You Win!", 100);
+	centerText(mWinText[1], "Press L for a new level", 200);
+	centerText(mResetText, "Press R to reset", HEIGHT - 50);
 }
 
 MainScene::~MainScene()
 {
-	for (int i = 0; i < N; i++)
+	/*for (int i = 0; i < N; i++)
 	{
 		delete solution[i];
 		delete current[i];
 	}
 	delete solution;
-	delete current;
+	delete current;*/
 }
 
 void MainScene::run()
 {
-	sf::Clock clock;
-	sf::Time timeSinceLastUpdate = sf::Time::Zero;
 	while (mGame->mWindow.isOpen())
 	{
-		processEvents();
-		timeSinceLastUpdate += clock.restart();
 		processEvents();
 		//update();
 		render();
@@ -275,12 +244,6 @@ void MainScene::processEvents()
 	{
 		switch (evnt.type)
 		{
-		case sf::Event::KeyPressed:
-			handlePlayerInput(evnt.key.code, true);
-			break;
-		case sf::Event::KeyReleased:
-			handlePlayerInput(evnt.key.code, false);
-			break;
 		case sf::Event::Closed:
 			mWindow->close();
 			break;
@@ -304,6 +267,7 @@ void MainScene::processEvents()
 				{
 					dif = mWeirdShapes[1].hold(sf::Vector2f(x, y));
 					beingHold = &mWeirdShapes[1];
+					
 				}
 				else if (c == sf::Color::Blue)
 				{
@@ -320,9 +284,13 @@ void MainScene::processEvents()
 					dif = mWeirdShapes[4].hold(sf::Vector2f(x, y));
 					beingHold = &mWeirdShapes[4];
 				}
-				
+				else if (c == sf::Color::Magenta)
+				{
+					dif = mWeirdShapes[5].hold(sf::Vector2f(x, y));
+					beingHold = &mWeirdShapes[5];
+				}
 				else break;
-
+				resetCurrent();
 				hold = true;
 
 			}
@@ -331,39 +299,10 @@ void MainScene::processEvents()
 		{
 			if (hold) {
 				hold = false;
-				/*int x = evnt.mouseButton.x;
-				int y = evnt.mouseButton.y;
-				sf::Vector2i mousePosition = sf::Vector2i(x, y);
-				sf::Vector2i blockPosition = (sf::Vector2i) beingHold->getBlockPoint((sf::Vector2f)mousePosition);
-				sf::Vector2i modBlock(blockPosition);
-				//std::cout << (150 & ~127) << std::endl;
-				modBlock.x &= ~(EDGE - 1);
-				modBlock.y &= ~(EDGE - 1);
-				int row = modBlock.y / EDGE - 1;
-				int column = modBlock.x / EDGE - 1;
-				if (row >= 0 && column >= 0 && row < N && column < N)
-				{
-
-					if (std::sqrt(std::pow(points[row][column].x - blockPosition.x, 2) + std::pow(points[row][column].y - blockPosition.y, 2)) < RANGE)
-					{
-						beingHold->move(points[row][column] - (sf::Vector2f)blockPosition);
-					}
-					else if (std::sqrt(std::pow(points[row][column + 1].x - blockPosition.x, 2) + std::pow(points[row][column + 1].y - blockPosition.y, 2)) < RANGE)
-					{
-						beingHold->move(points[row][column + 1] - (sf::Vector2f)blockPosition);
-					}
-					else if (std::sqrt(std::pow(points[row + 1][column].x - blockPosition.x, 2) + std::pow(points[row + 1][column].y - blockPosition.y, 2)) < RANGE)
-					{
-						beingHold->move(points[row + 1][column] - (sf::Vector2f)blockPosition);
-					}
-					else if (std::sqrt(std::pow(points[row + 1][column + 1].x - blockPosition.x, 2) + std::pow(points[row + 1][column + 1].y - blockPosition.y, 2)) < RANGE)
-					{
-						beingHold->move(points[row + 1][column + 1] - (sf::Vector2f)blockPosition);
-					}
-				}*/
-				if(this->checkCanFit(evnt));
+				if(this->checkCanFit(evnt)!=false)
 				{
 					beingHold->move(moveBy);
+					hasWon = checkIfWon();
 				}
 				beingHold = nullptr;
 				break;
@@ -386,11 +325,22 @@ void MainScene::processEvents()
 				beingHold->setPosition(newpos.x, newpos.y);
 			}
 			break;
+		case sf::Event::KeyPressed:
+			switch (evnt.key.code)
+			{
+			case sf::Keyboard::L:
+				if (hasWon)newLevel();
+				hasWon = false;
+				break;
+			case sf::Keyboard::R:
+				newLevel(0);
+			}
+			break;
 		}
 	}
 
 }
-//update position
+
 void MainScene::update(sf::Time deltaTime)
 {/*
 	sf::Vector2f movement(0.f, 0.f);
@@ -418,18 +368,25 @@ void MainScene::drawWeirdShapes()
 //render sprites on the screen
 void MainScene::render()
 {
-	mWindow->clear(sf::Color::Black);
+	mWindow->clear(sf::Color(70, 130, 180));
+	//mWindow->draw(mBackground);
 	drawLines();
+	mWindow->draw(mResetText);
 	drawWeirdShapes();
-	mWindow->display();
+	if (hasWon)
+	{
+		mWindow->draw(mWinText[0]);
+		mWindow->draw(mWinText[1]);
+	}mWindow->display();
 }
 
 bool MainScene::checkCanFit(sf::Event &evnt)
 {
+	
 	int x = evnt.mouseButton.x;
 	int y = evnt.mouseButton.y;
-	sf::Vector2i mousePosition = sf::Vector2i(x, y);
-	sf::Vector2i blockPosition = (sf::Vector2i) beingHold->getBlockPoint((sf::Vector2f)mousePosition);
+	sf::Vector2f mousePosition = sf::Vector2f(x, y);
+	sf::Vector2f blockPosition = beingHold->getBlockPoint(mousePosition);
 	sf::Vector2i modBlock(blockPosition);
 	//std::cout << (150 & ~127) << std::endl;
 	modBlock.x &= ~(EDGE - 1);
@@ -470,16 +427,94 @@ bool MainScene::checkCanFit(sf::Event &evnt)
 	{
 		int row = (block.getPosition() + beingHold->getPosition() + moveBy).y / EDGE - 1;
 		int column = (block.getPosition() + beingHold->getPosition() + moveBy).x / EDGE - 1;
-		if (current[row][column] != 'X')return false;
-		current[row][column] = 'O';
+		if (current[row][column] != 'X') return false;
+		current[row][column] = beingHold->getMark();
 	}
 	return true;
+}
+
+void MainScene::resetCurrent()
+{
+	char c = beingHold->getMark();
+	for (auto i = 0; i < N; i++)
+		for (auto j = 0; j < N; j++)
+			if (current[i][j] == c) 
+				current[i][j] = 'X';
+}
+
+void MainScene::centerText(sf::Text & text, std::string value,float height, sf::Color & clr)
+{
+	text.setFont(mFont);
+	text.setFillColor(clr);
+	text.setString(value);
+	//mWinText.setPosition(sf::Vector2f(WIDTH / 3, HEIGHT / (MAX_NUMBER_OF_ITEMS + 1) * 1));
+	size_t CharacterSize = text.getCharacterSize();
+	std::string String = text.getString().toAnsiString();
+	bool bold = (text.getStyle() & sf::Text::Bold);
+	
+
+	sf::FloatRect rect = text.getGlobalBounds();
+
+	rect.left = (mWindow->getSize().x / 2.0f) - (rect.width / 2.0f);
+	rect.top = height;
+
+	text.setPosition(rect.left, rect.top);
+}
+
+void MainScene::newLevel(int t)
+{
+	if (t)
+	{
+		solution = MainScene::makeLevel();
+		current = new char*[N];
+		
+	}
+	mWeirdShapes = std::vector<sf::WeirdShape>();
+	for (auto i = 0; i < N; i++)
+	{
+		current[i] = new char[N];
+		for (int j = 0; j < N; j++)
+			current[i][j] = 'X';
+	}
+	for (int k = 0; k < M; k++)
+	{
+		sf::WeirdShape shape;
+		for (int i = 0; i < N; i++)
+			for (int j = 0; j < N; j++)
+			{
+				if (solution[i][j] == (k + '0'))
+				{
+					shape.addBlock(sf::Block(sf::Vector2f(EDGE*j, EDGE*i)));
+				}
+			}
+		mWeirdShapes.push_back(shape);
+	}
+
+	auto engine = std::default_random_engine{};
+	std::shuffle(std::begin(mWeirdShapes), std::end(mWeirdShapes), engine);
+	auto it = mColors.begin();
+	for (int i = 0; i < M; i++)
+	{
+
+		mWeirdShapes[i].setBlockColor(*it);
+		std::advance(it, 1);
+	}
 }
 
 void MainScene::handlePlayerInput(sf::Keyboard::Key key,
 	bool isPressed)
 {
 
+}
+
+bool MainScene::checkIfWon()
+{
+	for (int i = 0; i < N; i++)
+		for (int j = 0; j < N; j++)
+			if (current[i][j] == 'X')return false;
+			
+		
+	return true;
 }
 
 void print(char **m)

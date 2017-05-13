@@ -18,8 +18,13 @@ namespace sf
 		void setBlockColor(sf::Color &color);
 		Vector2f getBlockPoint(Vector2f &mousePosition);
 		std::vector<sf::Block>& getBlocks();
+		char getMark() const;
+
+
+		static char next;
 	private:
 		std::vector<sf::Block> mBlocks;
+		char mark;
 	};
 
 }
