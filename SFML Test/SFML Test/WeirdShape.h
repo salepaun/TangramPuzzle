@@ -19,12 +19,14 @@ namespace sf
 		Vector2f getBlockPoint(Vector2f &mousePosition);
 		std::vector<sf::Block>& getBlocks();
 		char getMark() const;
-
+		bool isInGrid() const;
+		void setInGrid(bool status);
 
 		static char next;
 	private:
 		std::vector<sf::Block> mBlocks;
 		char mark;
+		bool inGrid;
 	};
 
 }

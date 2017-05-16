@@ -3,10 +3,10 @@
 #include "Menu.h"
 #include "MainScene.h"
 
-#define WIDTH 1200
-#define HEIGHT 800
-#define N 5
-
+//#define WIDTH 1200
+//#define HEIGHT 800
+#define MENU 0
+#define MAIN 1
 
 
 class Game
@@ -19,8 +19,8 @@ private:
 	
 public:
 	sf::RenderWindow mWindow;
-	Menu mMenu;
-	MainScene mMain;
+	Menu *mMenu;
+	MainScene *mMain;
 	bool menu = true;
 
 };

@@ -5,29 +5,32 @@
 #include <algorithm>
 #include <random>
 #include <complex>
+#include "System.h"
 
 
 MainScene::MainScene(sf::RenderWindow *window, Game *game)
 	: mWindow(window)
 	, mGame(game)
 {
-	mTexture.create(WIDTH, HEIGHT);
-	for (auto i = 0; i <= N; i++)
+	mTexture.create(System::WIDTH, System::HEIGHT);
+	points = new sf::Vector2f*[System::N];
+	for (auto i = 0; i <= System::N; i++)
 	{
-		for (auto j = 0; j <= N; j++)
+		points[i] = new sf::Vector2f[System::N];
+		for (auto j = 0; j <= System::N; j++)
 		{
 			points[i][j].x = EDGE + j*EDGE;
 			points[i][j].y = EDGE + i*EDGE;
 
 		}
 	}
-	for (auto i = 0; i <= N; i++)
+	for (auto i = 0; i <= System::N; i++)
 	{
-		for (auto j = 0; j <= N; j++)
+		for (auto j = 0; j <= System::N; j++)
 		{
-			if (j != N)
+			if (j != System::N)
 				lines.push_back(sf::LineShape(points[i][j], points[i][j + 1]));
-			if (i != N )
+			if (i != System::N)
 				lines.push_back(sf::LineShape(points[i][j], points[i + 1][j]));
 		}
 	}
@@ -41,19 +44,23 @@ MainScene::MainScene(sf::RenderWindow *window, Game *game)
 	}
 	centerText(mWinText[0], "You Win!", 100);
 	centerText(mWinText[1], "Press L for a new level", 200);
-	centerText(mResetText, "Press R to reset", HEIGHT - 50);
-}
+	centerText(mResetText, "Press R to reset", System::HEIGHT - 50);
 
+}
+/*
 MainScene::~MainScene()
 {
-	/*for (int i = 0; i < N; i++)
+	for (int i = 0; i < System::N; i++)
 	{
 		delete solution[i];
 		delete current[i];
+		delete points[i];
 	}
 	delete solution;
-	delete current;*/
-}
+	delete current;
+	delete points;
+	
+}*/
 
 void MainScene::run()
 {
@@ -62,6 +69,7 @@ void MainScene::run()
 		processEvents();
 		//update();
 		render();
+		if (quit)return;
 	}
 }
 
@@ -69,46 +77,46 @@ char ** MainScene::makeLevel()
 {
 	std::random_device rd;
 	std::mt19937 mt(rd());
-	std::uniform_int_distribution<int> dist(0, N - 1);
+	std::uniform_int_distribution<int> dist(0, System::N - 1);
 	std::uniform_int_distribution<> way(0, 3);
 
 
-	char **m = new char*[N];
+	char **m = new char*[System::N];
 
 
-	for (auto i = 0; i < M; i++)
+	for (auto i = 0; i < System::M; i++)
 	{
-		m[i] = new char[N];
-		for (auto j = 0; j < M; j++)
+		m[i] = new char[System::N];
+		for (auto j = 0; j < System::M; j++)
 			m[i][j] = 'X';
 	}
 
-	auto left = N * N;
+	auto left = System::N * System::N;
 	auto row = dist(mt);
 	auto column = dist(mt);
 	bool out = false;
 	bool resetPosition = false;
 
-	for (auto i = 0; i < M; i++)
+	for (auto i = 0; i < System::M; i++)
 	{
 		if (resetPosition)
 		{
-			for (int it1 = 0; it1 < N; it1++)
+			for (int it1 = 0; it1 < System::N; it1++)
 			{
 				bool found = false;
-				for (int it2 = 0; it2 < N; it2++)
+				for (int it2 = 0; it2 < System::N; it2++)
 					if (m[it1][it2] == 'X') { row = it1; column = it2; found = true; break; }
 				if (found)break;
 			}
 			resetPosition = false;
 		}
 
-		std::uniform_int_distribution<> randSize(1, left - M + i + 1);
+		std::uniform_int_distribution<> randSize(1, left - System::M + i + 1);
 		auto sz = randSize(mt);
 		if (i == 0)
 		{
-			std::uniform_int_distribution<> d(-N / M, N / M);
-			sz = left / M + d(mt);
+			std::uniform_int_distribution<> d(-System::N / System::M, System::N / System::M);
+			sz = left / System::M + d(mt);
 		}
 		left -= sz;
 		for (int j = 0; j < sz; j++)
@@ -117,9 +125,9 @@ char ** MainScene::makeLevel()
 			
 			if (left != 0 && !(
 				(row > 0 && m[row - 1][column] == 'X')
-				|| (row < N - 1 && m[row + 1][column] == 'X')
+				|| (row < System::N - 1 && m[row + 1][column] == 'X')
 				|| (column > 0 && m[row][column - 1] == 'X')
-				|| (column < N - 1 && m[row][column + 1] == 'X')
+				|| (column < System::N - 1 && m[row][column + 1] == 'X')
 				))
 			{
 				left += sz - j - 1;
@@ -129,9 +137,9 @@ char ** MainScene::makeLevel()
 			else
 				if (!(
 					(row > 0 && m[row - 1][column] == 'X')
-					|| (row < N - 1 && m[row + 1][column] == 'X')
+					|| (row < System::N - 1 && m[row + 1][column] == 'X')
 					|| (column > 0 && m[row][column - 1] == 'X')
-					|| (column < N - 1 && m[row][column + 1] == 'X')
+					|| (column < System::N - 1 && m[row][column + 1] == 'X')
 					))
 				{
 					break;
@@ -149,7 +157,7 @@ char ** MainScene::makeLevel()
 					}
 					break;
 				case DOWN:
-					if (row < N - 1 && m[row + 1][column] == 'X')
+					if (row < System::N - 1 && m[row + 1][column] == 'X')
 					{
 						row++;
 						out = true;
@@ -163,7 +171,7 @@ char ** MainScene::makeLevel()
 					}
 					break;
 				case RIGHT:
-					if (column < N - 1 && m[row][column + 1] == 'X')
+					if (column < System::N - 1 && m[row][column + 1] == 'X')
 					{
 						column++;
 						out = true;
@@ -182,13 +190,13 @@ char ** MainScene::makeLevel()
 
 	std::unordered_map<char, int> map;
 	std::vector<std::pair<int, int>> x;
-	for (int i = 0; i < M; i++)
+	for (int i = 0; i < System::M; i++)
 	{
 		char c = i + '0';
 		map.insert_or_assign(c, 0);
 	}
-	for (int i = 0; i < N; i++)
-		for (int j = 0; j < N; j++)
+	for (int i = 0; i < System::N; i++)
+		for (int j = 0; j < System::N; j++)
 			if (m[i][j] == 'X') x.push_back(std::make_pair(i, j));
 			else
 				map[m[i][j]]++;
@@ -210,7 +218,7 @@ char ** MainScene::makeLevel()
 				c = m[val.first - 1][val.second];
 				min = map[m[val.first - 1][val.second]];
 			}
-			if (val.first < N - 1 && m[val.first + 1][val.second] != 'X' && map[m[val.first + 1][val.second]] < min)
+			if (val.first < System::N - 1 && m[val.first + 1][val.second] != 'X' && map[m[val.first + 1][val.second]] < min)
 			{
 				test = true;
 				c = m[val.first + 1][val.second];
@@ -222,7 +230,7 @@ char ** MainScene::makeLevel()
 				c = m[val.first][val.second - 1];
 				min = map[m[val.first][val.second - 1]];
 			}
-			if (val.second < N - 1 && m[val.first][val.second + 1] != 'X' && map[m[val.first][val.second + 1]] < min)
+			if (val.second < System::N - 1 && m[val.first][val.second + 1] != 'X' && map[m[val.first][val.second + 1]] < min)
 			{
 				test = true;
 				c = m[val.first][val.second + 1];
@@ -253,46 +261,53 @@ void MainScene::processEvents()
 				int x = evnt.mouseButton.x;
 				int y = evnt.mouseButton.y;
 				sf::Texture t;
-				t.create(WIDTH, HEIGHT);
+				t.create(System::WIDTH, System::HEIGHT);
 				t.update(*mWindow);
 				sf::Image img = t.copyToImage();
 				sf::Vector2i pos = sf::Vector2i(x, y);
 				sf::Color c = img.getPixel(x, y);
+				
 				if (c == sf::Color::Red)
 				{
-					dif = mWeirdShapes[0].hold(sf::Vector2f(x, y));
-					beingHold = &mWeirdShapes[0];
+					getHoldOfWeirdShape(0,x,y);
 				}
 				else if (c == sf::Color::Green)
 				{
-					dif = mWeirdShapes[1].hold(sf::Vector2f(x, y));
-					beingHold = &mWeirdShapes[1];
+					getHoldOfWeirdShape(1, x, y);
 					
 				}
 				else if (c == sf::Color::Blue)
 				{
-					dif = mWeirdShapes[2].hold(sf::Vector2f(x, y));
-					beingHold = &mWeirdShapes[2];
+					getHoldOfWeirdShape(2, x, y);
 				}
 				else if (c == sf::Color::Yellow)
 				{
-					dif = mWeirdShapes[3].hold(sf::Vector2f(x, y));
-					beingHold = &mWeirdShapes[3];
+					getHoldOfWeirdShape(3, x, y);
 				}
 				else if (c == sf::Color::Cyan)
 				{
-					dif = mWeirdShapes[4].hold(sf::Vector2f(x, y));
-					beingHold = &mWeirdShapes[4];
+					getHoldOfWeirdShape(4, x, y);
 				}
 				else if (c == sf::Color::Magenta)
 				{
-					dif = mWeirdShapes[5].hold(sf::Vector2f(x, y));
-					beingHold = &mWeirdShapes[5];
+					getHoldOfWeirdShape(5, x, y);
+				}
+				else if (c.r == 255 && c.g == 165 && c.b == 0)
+				{
+					getHoldOfWeirdShape(6, x, y);
+				}
+				else if (c.r == 128 && c.g == 0 && c.b == 128)
+				{
+					getHoldOfWeirdShape(7, x, y);
+				}
+				else if (c.r == 119 && c.g == 136 && c.b == 153)
+				{
+					getHoldOfWeirdShape(8, x, y);
 				}
 				else break;
 				resetCurrent();
 				hold = true;
-
+				c.r == 0;
 			}
 			break;
 		case sf::Event::MouseButtonReleased:
@@ -302,6 +317,7 @@ void MainScene::processEvents()
 				if(this->checkCanFit(evnt)!=false)
 				{
 					beingHold->move(moveBy);
+					beingHold->setInGrid(true);
 					hasWon = checkIfWon();
 				}
 				beingHold = nullptr;
@@ -334,17 +350,17 @@ void MainScene::processEvents()
 				break;
 			case sf::Keyboard::R:
 				newLevel(0);
+				hasWon = false;
+				break;
+			case sf::Keyboard::Escape:
+				quit = true;
+				mGame->menu = true;
+				break;
 			}
 			break;
 		}
 	}
 
-}
-
-void MainScene::update(sf::Time deltaTime)
-{/*
-	sf::Vector2f movement(0.f, 0.f);
-	mPlayer.move(movement * deltaTime.asSeconds());*/
 }
 
 void MainScene::drawLines()
@@ -359,8 +375,15 @@ void MainScene::drawWeirdShapes()
 {
 	for(auto &shape:mWeirdShapes)
 	{
+		if(shape.isInGrid())
 		mWindow->draw(shape);
 	}
+	for (auto &shape : mWeirdShapes)
+	{
+		if (!shape.isInGrid())
+			mWindow->draw(shape);
+	}
+
 	if(beingHold)
 	mWindow->draw(*beingHold);
 }
@@ -393,7 +416,7 @@ bool MainScene::checkCanFit(sf::Event &evnt)
 	modBlock.y &= ~(EDGE - 1);
 	int row = modBlock.y / EDGE - 1;
 	int column = modBlock.x / EDGE - 1;
-	if (row >= 0 && column >= 0 && row < N && column < N)
+	if (row >= 0 && column >= 0 && row < System::N && column < System::N)
 	{
 
 		if (std::sqrt(std::pow(points[row][column].x - blockPosition.x, 2) + std::pow(points[row][column].y - blockPosition.y, 2)) < RANGE)
@@ -420,7 +443,7 @@ bool MainScene::checkCanFit(sf::Event &evnt)
 	{
 		int row = (block.getPosition() + beingHold->getPosition() + moveBy).y/EDGE-1;
 		int column = (block.getPosition() + beingHold->getPosition() + moveBy).x / EDGE - 1;
-		if (!(row >= 0 && column >= 0 && row < N && column < N)) return false;
+		if (!(row >= 0 && column >= 0 && row < System::N && column < System::N)) return false;
 	}
 
 	for (auto &block : beingHold->getBlocks())
@@ -436,10 +459,11 @@ bool MainScene::checkCanFit(sf::Event &evnt)
 void MainScene::resetCurrent()
 {
 	char c = beingHold->getMark();
-	for (auto i = 0; i < N; i++)
-		for (auto j = 0; j < N; j++)
+	for (auto i = 0; i < System::N; i++)
+		for (auto j = 0; j < System::N; j++)
 			if (current[i][j] == c) 
 				current[i][j] = 'X';
+	beingHold->setInGrid(false);
 }
 
 void MainScene::centerText(sf::Text & text, std::string value,float height, sf::Color & clr)
@@ -466,21 +490,21 @@ void MainScene::newLevel(int t)
 	if (t)
 	{
 		solution = MainScene::makeLevel();
-		current = new char*[N];
+		current = new char*[System::N];
 		
 	}
 	mWeirdShapes = std::vector<sf::WeirdShape>();
-	for (auto i = 0; i < N; i++)
+	for (auto i = 0; i < System::N; i++)
 	{
-		current[i] = new char[N];
-		for (int j = 0; j < N; j++)
+		current[i] = new char[System::N];
+		for (int j = 0; j < System::N; j++)
 			current[i][j] = 'X';
 	}
-	for (int k = 0; k < M; k++)
+	for (int k = 0; k < System::M; k++)
 	{
 		sf::WeirdShape shape;
-		for (int i = 0; i < N; i++)
-			for (int j = 0; j < N; j++)
+		for (int i = 0; i < System::N; i++)
+			for (int j = 0; j < System::N; j++)
 			{
 				if (solution[i][j] == (k + '0'))
 				{
@@ -489,17 +513,46 @@ void MainScene::newLevel(int t)
 			}
 		mWeirdShapes.push_back(shape);
 	}
-
+	setRandomPositions();
 	auto engine = std::default_random_engine{};
 	std::shuffle(std::begin(mWeirdShapes), std::end(mWeirdShapes), engine);
 	auto it = mColors.begin();
-	for (int i = 0; i < M; i++)
+	for (int i = 0; i < System::M; i++)
 	{
 
 		mWeirdShapes[i].setBlockColor(*it);
 		std::advance(it, 1);
 	}
 }
+
+void MainScene::setRandomPositions()
+{
+	std::random_device rd;
+	std::mt19937 mt(rd());
+	std::uniform_int_distribution<> X(0, System::WIDTH - System::N * EDGE);
+	std::uniform_int_distribution<> Y(0, System::HEIGHT - System::N * EDGE);
+	int x;
+	int y;
+	for (auto &shape : mWeirdShapes)
+	{
+		x = X(mt);
+		y = Y(mt);
+		while (x < 6 * EDGE && y < 6 * EDGE)
+		{
+			x = X(mt);
+			y = Y(mt);
+		}
+		shape.setPosition(x, y);
+	}
+}
+
+void MainScene::getHoldOfWeirdShape(int i,int x,int y)
+{
+	dif = mWeirdShapes[i].hold(sf::Vector2f(x, y));
+	beingHold = &mWeirdShapes[i];
+}
+
+
 
 void MainScene::handlePlayerInput(sf::Keyboard::Key key,
 	bool isPressed)
@@ -509,8 +562,8 @@ void MainScene::handlePlayerInput(sf::Keyboard::Key key,
 
 bool MainScene::checkIfWon()
 {
-	for (int i = 0; i < N; i++)
-		for (int j = 0; j < N; j++)
+	for (int i = 0; i < System::N; i++)
+		for (int j = 0; j < System::N; j++)
 			if (current[i][j] == 'X')return false;
 			
 		
@@ -519,9 +572,9 @@ bool MainScene::checkIfWon()
 
 void print(char **m)
 {
-	for (auto i = 0; i < N; i++)
+	for (auto i = 0; i < System::N; i++)
 	{
-		for (auto j = 0; j < N; j++)
+		for (auto j = 0; j < System::N; j++)
 			std::cout << m[i][j] << " ";
 		std::cout << std::endl;
 	}

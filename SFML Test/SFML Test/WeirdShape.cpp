@@ -3,7 +3,8 @@
 char sf::WeirdShape::next = '0';
 
 sf::WeirdShape::WeirdShape():
-	mBlocks()
+	 mBlocks()
+	,inGrid(false)
 {
 	mark = next++;
 }
@@ -74,4 +75,14 @@ std::vector<sf::Block>& sf::WeirdShape::getBlocks()
 char sf::WeirdShape::getMark() const
 {
 	return mark;
+}
+
+bool sf::WeirdShape::isInGrid() const
+{
+	return inGrid;
+}
+
+void sf::WeirdShape::setInGrid(bool status)
+{
+	inGrid = status;
 }

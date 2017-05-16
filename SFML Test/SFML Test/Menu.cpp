@@ -1,10 +1,10 @@
 #include "Menu.h"
 #include "Game.h"
 #include <iostream>
+#include "System.h"
 
 #define PLAY 0
-#define OPTIONS 1
-#define EXIT 2
+#define EXIT 1
 
 Menu::Menu(sf::RenderWindow* window, Game *game)
 {
@@ -17,9 +17,10 @@ Menu::Menu(sf::RenderWindow* window, Game *game)
 		mWindow->close();
 		return;
 	}
-	centerText(menu[0], "Play", HEIGHT / (MAX_NUMBER_OF_ITEMS + 1),color(Red));
-	centerText(menu[1], "Options", HEIGHT / (MAX_NUMBER_OF_ITEMS + 1) + 100);
-	centerText(menu[2], "Exit", HEIGHT / (MAX_NUMBER_OF_ITEMS + 1) + 200);
+	
+	centerText(menu[0], "Play", System::HEIGHT / (MAX_NUMBER_OF_ITEMS + 1),color(Red));
+	centerText(nText, N_STRING, System::HEIGHT / (MAX_NUMBER_OF_ITEMS + 1) + 100);
+	centerText(menu[1], "Exit", System::HEIGHT / (MAX_NUMBER_OF_ITEMS + 1) + 200);
 
 	/*menu[1].setFont(mFont);
 	menu[1].setFillColor(sf::Color::White);
@@ -91,6 +92,12 @@ void Menu::handlePlayerInput(sf::Keyboard::Key key)
 		down = true;
 	else if (key == sf::Keyboard::Return)
 		enter = true;
+	else if (key == sf::Keyboard::Num5)
+		setN(5);
+	else if (key == sf::Keyboard::Num6)
+		setN(6);
+	//else if (key == sf::Keyboard::Num7)
+	//	setN(7);
 }
 
 void Menu::processEvents()
@@ -117,13 +124,10 @@ void Menu::update()
 	else if (down) MoveDown();
 	else if (enter)
 	{
-		mGame->menu = false;
 		switch (GetPressedItem())
 		{
 		case PLAY:
-
-			break;
-		case OPTIONS:
+			mGame->menu = false;
 			break;
 		case EXIT:
 			mWindow->close();
@@ -140,7 +144,7 @@ void Menu::render() const
 	{
 		mWindow->draw(menu[i]);
 	}
-
+	mWindow->draw(nText);
 	mWindow->display();
 }
 
@@ -161,4 +165,21 @@ void Menu::centerText(sf::Text & text, std::string value, float height, sf::Colo
 	rect.top = height;
 
 	text.setPosition(rect.left, rect.top);
+}
+
+void Menu::setN(int num)
+{
+	sf::String str = nText.getString();
+	str[3] = num + '0';
+	nText.setString(str);
+	System::N = num;
+	switch (num)
+	{
+	case 5: System::M = 7;
+		break;
+	case 6: System::M = 8;
+		break;
+	case 7: System::M = 9;
+		break;
+	}
 }
