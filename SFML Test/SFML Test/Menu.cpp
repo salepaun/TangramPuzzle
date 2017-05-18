@@ -21,29 +21,9 @@ Menu::Menu(sf::RenderWindow* window, Game *game)
 	centerText(menu[0], "Play", System::HEIGHT / (MAX_NUMBER_OF_ITEMS + 1),color(Red));
 	centerText(nText, N_STRING, System::HEIGHT / (MAX_NUMBER_OF_ITEMS + 1) + 100);
 	centerText(menu[1], "Exit", System::HEIGHT / (MAX_NUMBER_OF_ITEMS + 1) + 200);
-
-	/*menu[1].setFont(mFont);
-	menu[1].setFillColor(sf::Color::White);
-	menu[1].setString("Options");
-	menu[1].setPosition(sf::Vector2f(WIDTH / 3, HEIGHT / (MAX_NUMBER_OF_ITEMS + 1) * 2));
-
-	menu[2].setFont(mFont);
-	menu[2].setFillColor(sf::Color::White);
-	menu[2].setString("Exit");
-	menu[2].setPosition(sf::Vector2f(WIDTH / 3, HEIGHT / (MAX_NUMBER_OF_ITEMS + 1) * 3));*/
-
 	selectedItemIndex = 0;
-
 	up = down = enter = false;
-	/*sf::Texture texture;
-	if (!texture.loadFromFile("menu.png"))
-	{
-		std::cout << "background" << std::endl;
-		mWindow->close();
-		return;
-	}
-	mBackground = sf::Sprite(texture);
-	mBackground.setPosition(0, 0);*/
+
 }
 
 void Menu::MoveUp()
@@ -96,8 +76,8 @@ void Menu::handlePlayerInput(sf::Keyboard::Key key)
 		setN(5);
 	else if (key == sf::Keyboard::Num6)
 		setN(6);
-	//else if (key == sf::Keyboard::Num7)
-	//	setN(7);
+	else if (key == sf::Keyboard::Num7)
+		setN(7);
 }
 
 void Menu::processEvents()
@@ -109,6 +89,7 @@ void Menu::processEvents()
 		{
 		case sf::Event::KeyPressed:
 			handlePlayerInput(evnt.key.code);
+			if (enter)return;
 			break;
 		case sf::Event::Closed:
 			mGame->mWindow.close();

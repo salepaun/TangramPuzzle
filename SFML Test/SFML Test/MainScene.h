@@ -15,6 +15,7 @@
 #define color(x) sf::Color(sf::Color::x)
 #define EDGE 64
 #define RANGE EDGE/3
+#define SCORE_STRING "Score: "
 
 class Game;
 
@@ -23,11 +24,12 @@ class MainScene
 public:
 
 	MainScene(sf::RenderWindow *window, Game *game);
-	//~MainScene();
+	~MainScene();
 	void run();
 	static char **makeLevel();
+	static void correctSolution(char **m);
+	static void initialSolution(char **m);
 private:
-	void handlePlayerInput(sf::Keyboard::Key key, bool isPressed);
 	bool checkIfWon();
 	void processEvents();
 	void drawLines();
@@ -39,6 +41,7 @@ private:
 	void newLevel(int i = 1);
 	void setRandomPositions();
 	void getHoldOfWeirdShape(int in,int x,int y);
+	bool handleColorInput(sf::Color &c, int x, int y);
 
 private:
 	sf::RenderWindow *mWindow;
@@ -48,7 +51,6 @@ private:
 	std::vector<sf::WeirdShape> mWeirdShapes;
 	std::list<sf::Color> mColors = { color(Red),color(Green),color(Blue), color(Yellow), color(Cyan),color(Magenta),sf::Color(255,165,0),sf::Color(128,0,128),sf::Color(119,136,153) };
 	int mNextColorIndex = 0;
-	std::unordered_map<std::string, sf::WeirdShape> mHash;
 	char **solution, **current;
 	bool hold = false;
 	bool hasWon = false;
@@ -56,15 +58,10 @@ private:
 	sf::WeirdShape *beingHold;
 	sf::Vector2f dif;
 	sf::Vector2f moveBy;
-	sf::Text mWinText[2], mResetText;
+	sf::Text mWinText[2], mResetText, mScoreText;
 	sf::Font mFont;
-	
-	
-
-
+	int score;
 	Game *mGame;
-
-
 
 };
 

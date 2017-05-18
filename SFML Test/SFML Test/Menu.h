@@ -1,7 +1,7 @@
 #pragma once
 #include "SFML/Graphics.hpp"
 #define MAX_NUMBER_OF_ITEMS 2
-#define N_STRING "N: 5 (5, 6)"
+#define N_STRING "N: 5 (5, 6, 7)"
 
 
 class Game;

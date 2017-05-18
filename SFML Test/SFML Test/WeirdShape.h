@@ -9,10 +9,10 @@ namespace sf
 	public:
 		WeirdShape();
 
-		void draw(sf::RenderTarget& target, RenderStates states) const;
+		void draw(sf::RenderTarget& target, RenderStates states) const override;
 
-		virtual std::size_t getPointCount() const;
-		virtual Vector2f getPoint(std::size_t index) const;
+		std::size_t getPointCount() const override;
+		Vector2f getPoint(std::size_t index) const override;
 		void addBlock(sf::Block &block);
 		Vector2f hold(sf::Vector2f &pos);
 		void setBlockColor(sf::Color &color);
