@@ -6,5 +6,6 @@ public:
 	static int M;
 	static int WIDTH;
 	static int HEIGHT;
+	static int SCORE;
 };
 

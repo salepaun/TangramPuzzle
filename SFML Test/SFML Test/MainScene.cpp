@@ -11,7 +11,6 @@
 MainScene::MainScene(sf::RenderWindow *window, Game *game)
 	: mWindow(window)
 	, mGame(game)
-	, score(0)
 {
 	mTexture.create(System::WIDTH, System::HEIGHT);
 	points = new sf::Vector2f*[System::N + 1];
@@ -46,7 +45,7 @@ MainScene::MainScene(sf::RenderWindow *window, Game *game)
 	centerText(mWinText[0], "You Win!", 100);
 	centerText(mWinText[1], "Press L for a new level", 200);
 	centerText(mResetText, "Press R to reset", System::HEIGHT - 50);
-	centerText(mScoreText, SCORE_STRING + std::to_string(score), 15);
+	centerText(mScoreText, SCORE_STRING + std::to_string(System::SCORE), 15);
 }
 
 MainScene::~MainScene()
@@ -376,7 +375,10 @@ void MainScene::setRandomPositions()
 void MainScene::getHoldOfWeirdShape(int i,int x,int y)
 {
 	if (hasWon)
-		mScoreText.setString(SCORE_STRING + std::to_string(--score));
+	{
+		System::SCORE -= System::N - 4;
+		mScoreText.setString(SCORE_STRING + std::to_string(System::SCORE));
+	}
 	hasWon = false;
 	dif = mWeirdShapes[i].hold(sf::Vector2f(x, y));
 	beingHold = &mWeirdShapes[i];
@@ -600,8 +602,8 @@ bool MainScene::checkIfWon()
 		for (int j = 0; j < System::N; j++)
 			if (current[i][j] == 'X')return false;
 			
-	score++;
-	mScoreText.setString(SCORE_STRING + std::to_string(score));
+	System::SCORE += System::N - 4;
+	mScoreText.setString(SCORE_STRING + std::to_string(System::SCORE));
 	return true;
 }
 

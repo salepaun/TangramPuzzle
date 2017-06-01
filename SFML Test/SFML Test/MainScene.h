@@ -61,7 +61,7 @@ private:
 	sf::Vector2f moveBy;
 	sf::Text mWinText[2], mResetText, mScoreText;
 	sf::Font mFont;
-	int score;
+	//int score;
 	Game *mGame;
 
 };
