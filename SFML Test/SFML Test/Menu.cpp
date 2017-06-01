@@ -2,6 +2,7 @@
 #include "Game.h"
 #include <iostream>
 #include "System.h"
+#include <stdio.h>
 
 #define PLAY 0
 #define EXIT 1
@@ -18,8 +19,11 @@ Menu::Menu(sf::RenderWindow* window, Game *game)
 		return;
 	}
 	
+	char buffer[20];
+	sprintf(buffer, N_STRING, System::N);
+
 	centerText(menu[0], "Play", System::HEIGHT / (MAX_NUMBER_OF_ITEMS + 1),color(Red));
-	centerText(nText, N_STRING, System::HEIGHT / (MAX_NUMBER_OF_ITEMS + 1) + 100);
+	centerText(nText, buffer, System::HEIGHT / (MAX_NUMBER_OF_ITEMS + 1) + 100);
 	centerText(menu[1], "Exit", System::HEIGHT / (MAX_NUMBER_OF_ITEMS + 1) + 200);
 	selectedItemIndex = 0;
 	up = down = enter = false;

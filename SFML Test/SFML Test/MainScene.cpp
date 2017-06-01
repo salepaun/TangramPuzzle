@@ -154,13 +154,11 @@ void MainScene::processEvents()
 				if (hasWon) 
 				{
 					newLevel(); 
-					score++;
-					mScoreText.setString(SCORE_STRING + std::to_string(score));
 				}
 				hasWon = false;
 				break;
 			case sf::Keyboard::R:
-				newLevel(0);
+				setRandomPositions();
 				hasWon = false;
 				break;
 			case sf::Keyboard::Escape:
@@ -355,7 +353,7 @@ void MainScene::setRandomPositions()
 	{
 		x = X(mt);
 		y = Y(mt);
-		while (x < 6 * EDGE && y < 6 * EDGE)
+		while (x < (System::N+1) * EDGE && y < (System::N + 1) * EDGE)
 		{
 			x = X(mt);
 			y = Y(mt);
@@ -366,6 +364,8 @@ void MainScene::setRandomPositions()
 
 void MainScene::getHoldOfWeirdShape(int i,int x,int y)
 {
+	if (hasWon)
+		mScoreText.setString(SCORE_STRING + std::to_string(--score));
 	hasWon = false;
 	dif = mWeirdShapes[i].hold(sf::Vector2f(x, y));
 	beingHold = &mWeirdShapes[i];
@@ -420,8 +420,7 @@ bool MainScene::handleColorInput(sf::Color & c, int x, int y)
 		getHoldOfWeirdShape(8, x, y);
 		k = 8;
 	}
-	if (k!= -1)return true;
-	return false;
+	return k != -1;
 }
 
 void MainScene::correctSolution(char **m)
@@ -590,7 +589,8 @@ bool MainScene::checkIfWon()
 		for (int j = 0; j < System::N; j++)
 			if (current[i][j] == 'X')return false;
 			
-		
+	score++;
+	mScoreText.setString(SCORE_STRING + std::to_string(score));
 	return true;
 }
 
