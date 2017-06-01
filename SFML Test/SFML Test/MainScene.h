@@ -39,6 +39,7 @@ private:
 	void resetCurrent();
 	void centerText(sf::Text &text, std::string value, float height, sf::Color &clr = sf::Color(sf::Color::Black));
 	void newLevel(int i = 1);
+	void resetCurrentToEmpty();
 	void setRandomPositions();
 	void getHoldOfWeirdShape(int in,int x,int y);
 	bool handleColorInput(sf::Color &c, int x, int y);

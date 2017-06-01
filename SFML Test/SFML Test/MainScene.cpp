@@ -125,6 +125,7 @@ void MainScene::processEvents()
 				if (!handleColorInput(c, x, y))break;
 				resetCurrent();
 				hold = true;
+				//print(current);
 			}
 			break;
 		case sf::Event::MouseButtonReleased:
@@ -138,6 +139,7 @@ void MainScene::processEvents()
 					hasWon = checkIfWon();
 				}
 				beingHold = nullptr;
+				//print(current);
 				break;
 			}}
 		case sf::Event::MouseMoved:
@@ -158,7 +160,8 @@ void MainScene::processEvents()
 				hasWon = false;
 				break;
 			case sf::Keyboard::R:
-				setRandomPositions();
+				setRandomPositions(); 
+				resetCurrentToEmpty();
 				hasWon = false;
 				break;
 			case sf::Keyboard::Escape:
@@ -305,6 +308,7 @@ void MainScene::newLevel(int t)
 				delete[] solution[i];
 			delete[] solution;
 		}
+		sf::WeirdShape::next = '0';
 		solution = MainScene::makeLevel();
 		current = new char*[System::N+1];
 		
@@ -339,6 +343,13 @@ void MainScene::newLevel(int t)
 		mWeirdShapes[i].setBlockColor(*it);
 		std::advance(it, 1);
 	}
+}
+
+void MainScene::resetCurrentToEmpty()
+{
+	for (int i = 0; i < System::N; i++)
+		for (int j = 0; j < System::N; j++)
+			current[i][j] = 'X';
 }
 
 void MainScene::setRandomPositions()
@@ -596,6 +607,7 @@ bool MainScene::checkIfWon()
 
 void print(char **m)
 {
+	printf("\n\n");
 	for (auto i = 0; i < System::N; i++)
 	{
 		for (auto j = 0; j < System::N; j++)
