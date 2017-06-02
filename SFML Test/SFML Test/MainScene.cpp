@@ -11,12 +11,13 @@
 MainScene::MainScene(sf::RenderWindow *window, Game *game)
 	: mWindow(window)
 	, mGame(game)
+	, solution(System::N,std::vector<char>(System::N))
+	, current(System::N, std::vector<char>(System::N))
+	, points(System::N+1, std::vector<sf::Vector2f>(System::N+1))
 {
 	mTexture.create(System::WIDTH, System::HEIGHT);
-	points = new sf::Vector2f*[System::N + 1];
 	for (auto i = 0; i <= System::N; i++)
 	{
-		points[i] = new sf::Vector2f[System::N + 1];
 		for (auto j = 0; j <= System::N; j++)
 		{
 			points[i][j].x = EDGE + j*EDGE;
@@ -50,7 +51,7 @@ MainScene::MainScene(sf::RenderWindow *window, Game *game)
 
 MainScene::~MainScene()
 {
-	print(solution);
+	/*print(solution);
 	std::cout << std::endl;
 	print(current);
 	for (int i = 0; i < System::N + 1; i++)
@@ -65,7 +66,7 @@ MainScene::~MainScene()
 	}
 	delete [] solution;
 	delete [] current;
-	delete [] points;
+	delete [] points;*/
 	
 }
 
@@ -80,22 +81,22 @@ void MainScene::run()
 	}
 }
 
-char ** MainScene::makeLevel()
+void MainScene::hint()
 {
-	char **m = new char*[System::N+2];
-	if (!m)std::exit(-1);
-
-	for (auto i = 0; i < System::M; i++)
-	{
-		m[i] = new char[System::N + 2];
-		if (!m[i])std::exit(-1);
-		for (auto j = 0; j < System::M; j++)
-			m[i][j] = 'X';
-	}
-
-	initialSolution(m);
-	correctSolution(m);
-	return m;
+	if (hasWon)
+		return;
+	beingHold = nullptr;
+	hold = false;
+	for(auto &blocks:mWeirdShapes)
+		if (!blocks.isInGrid()) { beingHold = &blocks; break; }
+	if (!beingHold)return;
+	beingHold->setPosition(points[0][0]);
+	updateCurrent();
+	beingHold->setInGrid(true);
+	beingHold = nullptr;
+	hold = false;
+	hasWon = checkIfWon();
+	
 }
 
 void MainScene::processEvents()
@@ -131,7 +132,7 @@ void MainScene::processEvents()
 		{
 			if (hold) {
 				hold = false;
-				if (this->checkCanFit(evnt) != false)
+				if (this->checkCanFit(evnt))
 				{
 					beingHold->move(moveBy);
 					beingHold->setInGrid(true);
@@ -159,8 +160,9 @@ void MainScene::processEvents()
 				hasWon = false;
 				break;
 			case sf::Keyboard::R:
-				setRandomPositions(); 
-				resetCurrentToEmpty();
+			setRandomPositions(); 
+				resetMatrix(current);
+				resetIsInGrid();
 				hasWon = false;
 				break;
 			case sf::Keyboard::Escape:
@@ -214,6 +216,17 @@ void MainScene::render()
 	mWindow->display();
 }
 
+void MainScene::updateCurrent()
+{
+	for (auto &block : beingHold->getBlocks())
+	{
+		int row = (block.getPosition() + beingHold->getPosition() + moveBy).y / EDGE - 1;
+		int column = (block.getPosition() + beingHold->getPosition() + moveBy).x / EDGE - 1;
+		if (current[row][column] != 'X') return;
+		current[row][column] = beingHold->getMark();
+	}
+}
+
 bool MainScene::checkCanFit(sf::Event &evnt)
 {
 	
@@ -258,13 +271,7 @@ bool MainScene::checkCanFit(sf::Event &evnt)
 		if (!(row >= 0 && column >= 0 && row < System::N && column < System::N)) return false;
 	}
 
-	for (auto &block : beingHold->getBlocks())
-	{
-		int row = (block.getPosition() + beingHold->getPosition() + moveBy).y / EDGE - 1;
-		int column = (block.getPosition() + beingHold->getPosition() + moveBy).x / EDGE - 1;
-		if (current[row][column] != 'X') return false;
-		current[row][column] = beingHold->getMark();
-	}
+	updateCurrent();
 	return true;
 }
 
@@ -301,24 +308,15 @@ void MainScene::newLevel(int t)
 {
 	if (t)
 	{
-		if(solution)
-		{
-			for (int i = 0; i < System::N; i++)
-				delete[] solution[i];
-			delete[] solution;
-		}
+		
 		sf::WeirdShape::next = '0';
-		solution = MainScene::makeLevel();
-		current = new char*[System::N+1];
+		resetMatrix(solution);
+		initialSolution();
+		correctSolution();
 		
 	}
 	mWeirdShapes = std::vector<sf::WeirdShape>();
-	for (auto i = 0; i < System::N; i++)
-	{
-		current[i] = new char[System::N+1];
-		for (int j = 0; j < System::N; j++)
-			current[i][j] = 'X';
-	}
+	resetMatrix(current);
 	for (int k = 0; k < System::M; k++)
 	{
 		sf::WeirdShape shape;
@@ -344,15 +342,20 @@ void MainScene::newLevel(int t)
 	}
 }
 
-void MainScene::resetCurrentToEmpty()
+void MainScene::resetMatrix(std::vector<std::vector<char>>& vec)
 {
-	for (int i = 0; i < System::N; i++)
-		for (int j = 0; j < System::N; j++)
-			current[i][j] = 'X';
+	for (auto &row : vec)
+		for (auto &cell : row)
+			cell = 'X';
 }
 
 void MainScene::setRandomPositions()
 {
+	if (hasWon) 
+	{
+		System::SCORE -= System::N - 4;
+		mScoreText.setString(SCORE_STRING + std::to_string(System::SCORE));
+	}
 	std::random_device rd;
 	std::mt19937 mt(rd());
 	std::uniform_int_distribution<> X(0, System::WIDTH - System::N * EDGE);
@@ -436,7 +439,7 @@ bool MainScene::handleColorInput(sf::Color & c, int x, int y)
 	return k != -1;
 }
 
-void MainScene::correctSolution(char **m)
+void MainScene::correctSolution()
 {
 	std::unordered_map<char, int> map;
 	std::vector<std::pair<int, int>> x;
@@ -447,9 +450,9 @@ void MainScene::correctSolution(char **m)
 	}
 	for (int i = 0; i < System::N; i++)
 		for (int j = 0; j < System::N; j++)
-			if (m[i][j] == 'X') x.push_back(std::make_pair(i, j));
+			if (solution[i][j] == 'X') x.push_back(std::make_pair(i, j));
 			else
-				map[m[i][j]]++;
+				map[solution[i][j]]++;
 
 	char c = '0';
 	bool proba = true;
@@ -462,38 +465,38 @@ void MainScene::correctSolution(char **m)
 			bool test = false;
 			int min = ~(1 << 31);
 			if (val.first > 0
-				&& m[val.first - 1][val.second] != 'X' && map[m[val.first - 1][val.second]] < min)
+				&& solution[val.first - 1][val.second] != 'X' && map[solution[val.first - 1][val.second]] < min)
 			{
 				test = true;
-				c = m[val.first - 1][val.second];
-				min = map[m[val.first - 1][val.second]];
+				c = solution[val.first - 1][val.second];
+				min = map[solution[val.first - 1][val.second]];
 			}
-			if (val.first < System::N - 1 && m[val.first + 1][val.second] != 'X' && map[m[val.first + 1][val.second]] < min)
+			if (val.first < System::N - 1 && solution[val.first + 1][val.second] != 'X' && map[solution[val.first + 1][val.second]] < min)
 			{
 				test = true;
-				c = m[val.first + 1][val.second];
-				min = map[m[val.first + 1][val.second]];
+				c = solution[val.first + 1][val.second];
+				min = map[solution[val.first + 1][val.second]];
 			}
-			if (val.second > 0 && m[val.first][val.second - 1] != 'X' && map[m[val.first][val.second - 1]] < min)
+			if (val.second > 0 && solution[val.first][val.second - 1] != 'X' && map[solution[val.first][val.second - 1]] < min)
 			{
 				test = true;
-				c = m[val.first][val.second - 1];
-				min = map[m[val.first][val.second - 1]];
+				c = solution[val.first][val.second - 1];
+				min = map[solution[val.first][val.second - 1]];
 			}
-			if (val.second < System::N - 1 && m[val.first][val.second + 1] != 'X' && map[m[val.first][val.second + 1]] < min)
+			if (val.second < System::N - 1 && solution[val.first][val.second + 1] != 'X' && map[solution[val.first][val.second + 1]] < min)
 			{
 				test = true;
-				c = m[val.first][val.second + 1];
-				min = map[m[val.first][val.second + 1]];
+				c = solution[val.first][val.second + 1];
+				min = map[solution[val.first][val.second + 1]];
 			}
 			if (!test)proba = true;
-			m[val.first][val.second] = c;
+			solution[val.first][val.second] = c;
 			map[c]++;
 		}
 	}
 }
 
-void MainScene::initialSolution(char ** m)
+void MainScene::initialSolution()
 {
 	std::random_device rd;
 	std::mt19937 mt(rd());
@@ -514,7 +517,7 @@ void MainScene::initialSolution(char ** m)
 			{
 				bool found = false;
 				for (int it2 = 0; it2 < System::N; it2++)
-					if (m[it1][it2] == 'X') { row = it1; column = it2; found = true; break; }
+					if (solution[it1][it2] == 'X') { row = it1; column = it2; found = true; break; }
 				if (found)break;
 			}
 			resetPosition = false;
@@ -530,13 +533,13 @@ void MainScene::initialSolution(char ** m)
 		left -= sz;
 		for (int j = 0; j < sz; j++)
 		{
-			m[row][column] = i + '0';
+			solution[row][column] = i + '0';
 
 			if (left != 0 && !(
-				(row > 0 && m[row - 1][column] == 'X')
-				|| (row < System::N - 1 && m[row + 1][column] == 'X')
-				|| (column > 0 && m[row][column - 1] == 'X')
-				|| (column < System::N - 1 && m[row][column + 1] == 'X')
+				(row > 0 && solution[row - 1][column] == 'X')
+				|| (row < System::N - 1 && solution[row + 1][column] == 'X')
+				|| (column > 0 && solution[row][column - 1] == 'X')
+				|| (column < System::N - 1 && solution[row][column + 1] == 'X')
 				))
 			{
 				left += sz - j - 1;
@@ -545,10 +548,10 @@ void MainScene::initialSolution(char ** m)
 			}
 			else
 				if (!(
-					(row > 0 && m[row - 1][column] == 'X')
-					|| (row < System::N - 1 && m[row + 1][column] == 'X')
-					|| (column > 0 && m[row][column - 1] == 'X')
-					|| (column < System::N - 1 && m[row][column + 1] == 'X')
+					(row > 0 && solution[row - 1][column] == 'X')
+					|| (row < System::N - 1 && solution[row + 1][column] == 'X')
+					|| (column > 0 && solution[row][column - 1] == 'X')
+					|| (column < System::N - 1 && solution[row][column + 1] == 'X')
 					))
 				{
 					break;
@@ -559,28 +562,28 @@ void MainScene::initialSolution(char ** m)
 				switch (way(mt))
 				{
 				case UP:
-					if (row > 0 && m[row - 1][column] == 'X')
+					if (row > 0 && solution[row - 1][column] == 'X')
 					{
 						row--;
 						out = true;
 					}
 					break;
 				case DOWN:
-					if (row < System::N - 1 && m[row + 1][column] == 'X')
+					if (row < System::N - 1 && solution[row + 1][column] == 'X')
 					{
 						row++;
 						out = true;
 					}
 					break;
 				case LEFT:
-					if (column > 0 && m[row][column - 1] == 'X')
+					if (column > 0 && solution[row][column - 1] == 'X')
 					{
 						column--;
 						out = true;
 					}
 					break;
 				case RIGHT:
-					if (column < System::N - 1 && m[row][column + 1] == 'X')
+					if (column < System::N - 1 && solution[row][column + 1] == 'X')
 					{
 						column++;
 						out = true;
@@ -607,14 +610,10 @@ bool MainScene::checkIfWon()
 	return true;
 }
 
-void print(char **m)
+void MainScene::resetIsInGrid()
 {
-	printf("\n\n");
-	for (auto i = 0; i < System::N; i++)
-	{
-		for (auto j = 0; j < System::N; j++)
-			std::cout << m[i][j] << " ";
-		std::cout << std::endl;
-	}
+	for (auto &block : mWeirdShapes)
+		block.setInGrid(false);
 }
+
 

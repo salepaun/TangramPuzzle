@@ -35,6 +35,7 @@ void sf::Block::draw(sf::RenderTarget & target, sf::RenderStates states) const
 {
 	target.draw(mShape, states);
 }
+
 sf::Vector2f sf::Block::getPosition() const
 {
 	return mShape.getPosition();

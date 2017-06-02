@@ -31,24 +31,20 @@ namespace sf
 		update();
 	}
 
-
 	float LineShape::getThickness() const
 	{
 		return m_thickness;
 	}
-
 
 	float LineShape::getLength() const
 	{
 		return std::sqrt(m_direction.x*m_direction.x + m_direction.y*m_direction.y);
 	}
 
-
 	unsigned int LineShape::getPointCount() const
 	{
 		return 4;
 	}
-
 
 	Vector2f LineShape::getPoint(unsigned int index) const
 	{
